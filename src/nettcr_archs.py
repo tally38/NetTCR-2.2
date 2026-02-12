@@ -5,13 +5,16 @@ from tensorflow.keras import layers
 
 #These networks are based on NetTCR 2.1 by Alessandro Montemurro
 def CNN_CDR123_global_max(dropout_rate, seed, embed_dim = 20):
-    a1_max = 7
+    a1_max = 8 # formally 7
+    a1_max = 7 # formally 7
     a2_max = 8
     a3_max = 22
     b1_max = 6
     b2_max = 7
     b3_max = 23
-    pep_max = 12
+    pep_max = 24 # should really re-train with removing the long one; formally 12
+    pep_max = 13
+    # pep_max = 12 # should really re-train with removing the long one; formally 13
     #embed_dim = 20
     conv_activation = "relu"
     dense_activation = "sigmoid"
@@ -132,7 +135,10 @@ def CNN_CDR123_global_max_two_step_pre_training(dropout_rate, seed, embed_dim = 
     b1_max = 6
     b2_max = 7
     b3_max = 23
-    pep_max = 12
+    pep_max = 24
+    pep_max = 13
+    # pep_max = 12
+
     #embed_dim = 20
     conv_activation = "relu"
     dense_activation = "sigmoid"

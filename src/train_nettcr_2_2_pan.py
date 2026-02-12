@@ -84,16 +84,20 @@ weight_dict = np.log2(train_df.shape[0]/(train_df.peptide.value_counts()))/np.lo
 #Normalize, so that loss is comparable
 weight_dict = weight_dict*(train_df.shape[0]/np.sum(weight_dict*train_df.peptide.value_counts()))
 train_df["sample_weight"] = train_df["peptide"].map(weight_dict)
-val_df["sample_weight"] = val_df["peptide"].map(weight_dict)
+val_df["sample_weight"] = val_df["peptide"].map(weight_dict).fillna(1.0)
 
 #Padding to certain length
-a1_max = 7
+a1_max = 8 # formally 7
+a1_max = 7 # formally 7
 a2_max = 8
 a3_max = 22
 b1_max = 6
 b2_max = 7
 b3_max = 23
-pep_max = 12
+pep_max = 24 # should really re-train with removing the long one; formally 12
+pep_max = 13
+# pep_max = 12 # should really re-train with removing the long one; formally 12
+
      
 def make_tf_ds(df, encoding):
     """Encodes amino acid sequences using a BLOSUM50 matrix with a normalization factor of 5.
@@ -215,15 +219,23 @@ history = model.fit(x = {"pep": x_train[0],
 #Record training and validation loss            
 valid_loss = history.history["val_loss"]
 train_loss = history.history["loss"]
+train_auc01 = history.history["auc_01"]
+valid_auc01 = history.history["val_auc_01"]
+train_auc = history.history["auc"]
+valid_auc = history.history["val_auc"]
 
 
 #Plotting the losses
-ax.plot(train_loss, label='train')
-ax.plot(valid_loss, label='validation')
-ax.set_ylabel("Loss")
+ax.plot(train_loss, label='train loss')
+ax.plot(valid_loss, label='validation loss')
+ax.plot(train_auc01, label='train auc01')
+ax.plot(valid_auc01, label='validation auc01')
+ax.plot(train_auc, label='train auc')
+ax.plot(valid_auc, label='validation auc')
+
+ax.set_ylabel("Loss/AUC/AUC0.1")
 ax.set_xlabel("Epoch")
 ax.legend()
-
 #Load the best model
 model = keras.models.load_model(outdir+'/checkpoint/{}.h5'.format(model_name), custom_objects=dependencies)
 
@@ -242,3 +254,7 @@ with open(outdir+'/checkpoint/{}.tflite'.format(model_name), 'wb') as f:
 plt.tight_layout()
 plt.show()
 fig.savefig(outdir+'/{}_learning_curves.png'.format(model_name), dpi=100)
+
+import pickle
+with open(outdir+'/{}_history.pkl'.format(model_name), 'wb') as f:
+    pickle.dump(history.history, f)

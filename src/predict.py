@@ -6,6 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--test_data", help = "Dataset to perform the predictions on", type = str)
 parser.add_argument("--outdir", help = "Folder where the models are stored. The prediction file is saved to this location", type = str)
+parser.add_argument("--preddir", help = "Directory to save the predictions to", type = str)
 parser.add_argument("--model_name", help = "Prefix for the saved models. This prefix is also used for the prediction file", type = str)
 parser.add_argument("--model_type", help = "Type of NetTCR 2.2 model", choices = ["pan", "peptide", "pretrained"], type = str)
 parser.add_argument("--seed", default = 15, type = int)
@@ -16,6 +17,7 @@ args = parser.parse_args()
 ### Model prediction parameters ###
 test_data = str(args.test_data)
 outdir = str(args.outdir)
+preddir = str(args.preddir)
 model_name = str(args.model_name)
 model_type = str(args.model_type)
 seed = int(args.seed)
@@ -58,13 +60,13 @@ pep_list = list(test_df.peptide.value_counts(ascending=False).index)
 encoding = keras_utils.blosum50_20aa #Encoding for amino acid sequences
 
 #Padding to certain length
-a1_max = 7
+a1_max = 8 #7
 a2_max = 8
 a3_max = 22
 b1_max = 6
 b2_max = 7
 b3_max = 23
-pep_max = 12
+pep_max = 24 #12
 
 def make_tf_ds(df, encoding):
     """Encodes amino acid sequences using a BLOSUM50 matrix with a normalization factor of 5.
@@ -224,4 +226,4 @@ else:
     #Add prediction to test data
     x_test_df['prediction'] = avg_prediction
     print(str(round(time.time()-time_start, 3))+" seconds")
-    x_test_df.to_csv(outdir + '/{}_prediction.csv'.format(model_name), index=False)
+    x_test_df.to_csv(preddir + '/{}_prediction.csv'.format(model_name), index=False)
